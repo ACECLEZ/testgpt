@@ -9,6 +9,9 @@ const saveKeyButton = document.getElementById('save-key');
 
 let botMessage = '';
 
+// OpenAI API key (WARNING: Do not expose your API key in production)
+const API_KEY = 'your_openai_api_key_here';
+
 // Function to display messages in the chat window
 function displayMessage(sender, message) {
   const messageElement = document.createElement('div');
@@ -18,25 +21,33 @@ function displayMessage(sender, message) {
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-// Function to send user's message to the server
-function sendUserMessage() {
+// Function to send user's message to the OpenAI API
+async function sendUserMessage() {
   const userMessage = userMessageInput.value.trim();
   if (userMessage !== '') {
     displayMessage('You', userMessage);
     userMessageInput.value = '';
-    fetch('/send-message', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: userMessage }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        botMessage = data.bot_response;
-        displayMessage('Bot', botMessage);
-      })
-      .catch((error) => console.error('Error:', error));
+
+    try {
+      const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${API_KEY}`
+        },
+        body: JSON.stringify({
+          prompt: userMessage,
+          max_tokens: 100,
+          stop: '\n'
+        })
+      });
+
+      const data = await response.json();
+      botMessage = data.choices[0].text.trim();
+      displayMessage('Bot', botMessage);
+    } catch (error) {
+      console.error('Error:', error);
+    }
   }
 }
 
@@ -68,25 +79,14 @@ clearHistoryButton.addEventListener('click', () => {
 saveKeyButton.addEventListener('click', () => {
   const apiKey = apiKeyInput.value.trim();
   if (apiKey !== '') {
-    fetch('/save-key', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ key: apiKey }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          apiKeyDiv.style.display = 'none';
-          displayMessage('System', '[Updating API Key...]');
-          chatWindow.innerHTML = '';
-          displayMessage('System', '[Chatbot loaded successfully. You may BEGIN your conversation now.]');
-          sendUserMessage();
-        } else {
-          alert('Invalid API Key. Please ensure that a valid API key has been entered.');
-        }
-      })
-      .catch((error) => console.error('Error:', error));
+    // Update the OpenAI API key (WARNING: Do not expose your API key in production)
+    API_KEY = apiKey;
+    apiKeyDiv.style.display = 'none';
+    displayMessage('System', '[Updating API Key...]');
+    chatWindow.innerHTML = '';
+    displayMessage('System', '[Chatbot loaded successfully. You may BEGIN your conversation now.]');
+    sendUserMessage();
+  } else {
+    alert('Invalid API Key. Please enter a valid API key.');
   }
 });
