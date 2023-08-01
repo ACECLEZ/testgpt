@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT-3.5 Bot</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="chat-window" id="chat-window"></div>
+    <input
+      type="text"
+      id="user-message"
+      placeholder="Type your message here and hit the 'Enter' key"
+    />
+    <div class="buttons">
+      <button id="update-key">Update API Key</button>
+      <button id="listen">Listen To Message</button>
+      <button id="clear-history">Clear History</button>
+    </div>
+    <div class="api-key" id="api-key">
+      <input
+        type="text"
+        id="key-input"
+        placeholder="Enter your API key here"
+      />
+      <button id="save-key">Save Key</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
